@@ -13,5 +13,8 @@ if (!isset($_SESSION)) {
 <LINK rel="stylesheet" type="text/css" href="style.css" media='all'>
 <LINK rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/sweetalert/1.1.3/sweetalert.min.css">
 <title><?php echo $_SESSION['title']; ?>｜カタログメーカー</title>
+
+
+<p>test</p>
 </head>
 <body>
