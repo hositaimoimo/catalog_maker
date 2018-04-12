@@ -1,20 +1,178 @@
+body {
+	padding-top: 80px;
+}
+.container {
+  max-width: 600px;
+}
+.navbar-default {
+	background-color: #d9eeda;
+}
+.navbar-default .navbar-toggle .icon-bar {
+	background-color: #497860;
+}
+.navbar-default .navbar-toggle {
+    border-color: #497860;
+}
+.input_area {
+	width: 100%;
+	margin-bottom: 10px;
+}
+.input_area_link {
+	width: 80%;
+	margin-bottom: 10px;
+}
 .preview {
-	width: 300px;
-	height: 300px;
 	border: dashed 1px;
 	margin: 10px 0;
 	display: flex;
 	justify-content: center;
 	align-items: center;
 }
-.preview img {
+
+.preview img,
+.item_image img {
 	width:auto;
 	height:auto;
 	max-width:100%;
 	max-height:100%;
 }
-label { 
+label {
 	border-radius: 12px;
 	border: solid 1px;
 	padding: 0px 8px;
 }
+.profile {
+	margin: 10px 5px 20px 5px;
+	border-bottom: solid 1px #ccc;
+	border-top: solid 1px #ccc;
+	padding: 5px;
+}
+.profile h1 {
+	font-size: 15px;
+	margin-top: 0;
+	margin-bottom: 0;
+	font-family: "Open Sans","Helvetica Neue",Helvetica,Arial,"Yu Gothic",YuGothic,"ヒラギノ角ゴ ProN W3","Hiragino Kaku Gothic ProN","メイリオ",Meiryo,sans-serif;
+}
+.profile_sub span,
+.profile_sub a {
+	font-size: 80%;
+}
+.maker1 {
+	border-bottom: dashed 1px #d4d4d4;
+	padding-bottom: 5px;
+}
+.maker1 span {
+	color: #497860;
+}
+.maker2 {
+	padding-top: 5px;
+	vertical-align: middle;
+}
+.panel_main {
+	margin-top: 20px;
+	margin-bottom: 50px;
+}
+.panel_sub {
+	margin-bottom: 40px;
+}
+.panel-title {
+	word-break: break-all;
+}
+.catalog_comment,
+.item_list_catalog_name,
+.item_comment,
+.link1_url,
+.link2_url {
+	border-bottom: solid 1px #F2F2F2;
+	margin-bottom: 10px;
+	word-break: break-all;
+}
+.item_regist_button,
+.catalog_make_button,
+.select_image_button,
+.image_button_frame,
+.icons {
+	text-align: right;
+}
+.updated {
+	text-align: right;
+	margin: 5px 0;
+}
+.delete_catalog_alert,
+.delete_item_alert {
+	padding: 1px 3px;
+}
+.lock {
+	width: 23.6px;
+	padding: 1px 3px;
+}
+.favo {
+	padding: 1px 3px;
+}
+
+.item_image {
+	display: flex;
+	justify-content: center;
+	align-items: center;
+	border-bottom: solid 1px #F2F2F2;
+	padding-bottom: 5px;
+	margin-bottom: 5px;
+}
+ul.catalog_list,
+ul.item_list {
+	padding: 0;
+	list-style-type: none;
+}
+.sub {
+	font-size: 70%;
+	color: #6e6e6e;
+	margin: 0;
+}
+.updated_icon {
+	color: #333333;
+	font-size: 80%;
+}
+
+.center {
+	text-align: center;
+}
+/* sweet alert */
+.sa-success {
+	display: none !important;
+}
+.sweet-alert .sa-icon {
+	margin-top: 0px;
+	margin-bottom: 0px;
+	width: 40px;
+	height: 40px;
+}
+.sweet-alert h2 {
+	font-size: 20px;
+	margin: 10px 0;
+}
+.sweet-alert p {
+	font-size: 14px;
+}
+.sweet-alert button {
+	margin: 10px 5px 0 5px;
+}
+.sweet-alert .sa-icon.sa-warning .sa-dot {
+	bottom: 27px;
+}
+.sweet-alert .sa-icon.sa-warning .sa-body {
+	height: 20px;
+	top: 15px;
+}
+/***************/
+/* twitter */
+.twitter {
+	background-color: #00aced !important;
+	color: #fff !important;
+	width: 100%;
+	border-radius: 10px;
+}
+.twi_btn {
+	margin-top: 20px;
+	margin-bottom: 20px;
+}
+/***********/

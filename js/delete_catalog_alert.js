@@ -28,8 +28,7 @@
             // swal("カタログを削除しました", "", "success");
           }else{
             var id = '#catalog' + val;
-            $(id).hide();
-            swal("カタログを削除しました", "", "success");
+            location.reload();
           }
         },
           // 2つめは通信失敗時のコールバック

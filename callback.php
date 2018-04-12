@@ -42,17 +42,17 @@ $_SESSION['access_token'] = $access_token;
 $_SESSION['id'] = $id;
 $_SESSION['user_name'] = html_escape($name);
 $_SESSION['screen_name'] = html_escape($screen_name);
-$_SESSION['profile_image_url_https'] = $profile_image_url_https;
+$_SESSION['profile_image_url_https'] = html_escape($profile_image_url_https);
 $_SESSION['text'] = html_escape($text);
 
 // ユーザー重複チェック
 $result = count_double_user($dbh, $_SESSION['id']);
 if($result == 0){
   // 未登録⇒ユーザー登録
-  insert_user($dbh, $_SESSION['id'], $_SESSION['screen_name'], $_SESSION['user_name']);
+  insert_user($dbh, $_SESSION['id'], $_SESSION['screen_name'], $_SESSION['user_name'], $_SESSION['profile_image_url_https']);
 }else{
   // 登録済み⇒screen_nameが変わっているかもしれないので一応上書き
-  update_screen_name($dbh, $_SESSION['id'], $_SESSION['screen_name'], $_SESSION['user_name']);
+  update_screen_name($dbh, $_SESSION['id'], $_SESSION['screen_name'], $_SESSION['user_name'], $_SESSION['profile_image_url_https']);
 }
 
 //セッションIDをリジェネレート

@@ -30,16 +30,18 @@ if($img['name'] == '') {
 
 $item_name = html_escape($_POST['item_name']);
 $catalog_id = html_escape($_POST['catalog_id']);
-$item_comment = html_escape($_POST['item_comment']);
+$item_comment = nl2br(html_escape($_POST['item_comment']));
 // $image_path  画像表示用のパス
 $link1_url = html_escape($_POST['link1_url']);
 $link2_url = html_escape($_POST['link2_url']);
 $request_url = $_SESSION['request_url'];
 
 insert_item($dbh, $item_name, $catalog_id, $item_comment, $image_path, $link1_url, $link2_url);
+update_catalog($dbh, $catalog_id);
 
 // 登録完了フラグ
 $_SESSION['item_finish'] = $item_name;
+
 
 // 最後に元のページに戻る
 header( 'location: '. SITE_URL.'/'.$request_url );

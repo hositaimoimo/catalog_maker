@@ -36,13 +36,15 @@ function count_double_user($dbh, $sns_user_id) {
 }
 
 // ユーザーをDBに登録
-function insert_user($dbh, $sns_user_id, $screen_name, $user_name) {
+function insert_user($dbh, $sns_user_id, $screen_name, $user_name, $profile_image_url_https) {
   try {
-    $sql = "INSERT INTO user (sns_user_id, screen_name, user_name) VALUE (:sns_user_id, :screen_name, :user_name)";
+    $sql = "INSERT INTO user (sns_user_id, screen_name, user_name, profile_image_url_https)
+     VALUE (:sns_user_id, :screen_name, :user_name, :profile_image_url_https)";
     $stmt = $dbh -> prepare($sql);
     $stmt -> bindValue(':sns_user_id', $sns_user_id, PDO::PARAM_STR);
     $stmt -> bindValue(':screen_name', $screen_name, PDO::PARAM_STR);
     $stmt -> bindValue(':user_name', $user_name, PDO::PARAM_STR);
+    $stmt -> bindValue(':profile_image_url_https', $profile_image_url_https, PDO::PARAM_STR);
     $stmt -> execute();
   }catch (PDOException $e) {
     echo($e -> getMessage());
@@ -50,14 +52,16 @@ function insert_user($dbh, $sns_user_id, $screen_name, $user_name) {
   }
 }
 
-// スクリーンネームとユーザーネームの更新
-function update_screen_name($dbh, $sns_user_id, $screen_name, $user_name) {
+// ユーザー情報の更新
+function update_screen_name($dbh, $sns_user_id, $screen_name, $user_name, $profile_image_url_https) {
   try {
-    $sql = "UPDATE user SET screen_name = :screen_name, user_name = :user_name WHERE sns_user_id = :sns_user_id";
+    $sql = "UPDATE user SET screen_name = :screen_name, user_name = :user_name, profile_image_url_https = :profile_image_url_https
+     WHERE sns_user_id = :sns_user_id";
     $stmt = $dbh -> prepare($sql);
     $stmt -> bindValue(':sns_user_id', $sns_user_id, PDO::PARAM_STR);
     $stmt -> bindValue(':screen_name', $screen_name, PDO::PARAM_STR);
     $stmt -> bindValue(':user_name', $user_name, PDO::PARAM_STR);
+    $stmt -> bindValue(':profile_image_url_https', $profile_image_url_https, PDO::PARAM_STR);
     $stmt -> execute();
   }catch (PDOException $e) {
     echo($e -> getMessage());
@@ -69,21 +73,6 @@ function update_screen_name($dbh, $sns_user_id, $screen_name, $user_name) {
 ///////////////////////////////////////////////////
 // カタログ関連
 ///////////////////////////////////////////////////
-
-// そのユーザーが作成済みのカタログ数を返す
-// function count_users_catalog($dbh, $user_id) {
-//   try {
-//     $sql = "SELECT * FROM catalog  WHERE user_id = :user_id";
-//     $stmt = $dbh -> prepare($sql);
-//     $stmt -> bindValue(':user_id', $user_id, PDO::PARAM_STR);
-//     $stmt -> execute();
-//   }catch (PDOException $e) {
-//     echo($e -> getMessage());
-//     die();
-//   }
-//   $count = $stmt->rowCount();
-//   return $count;
-// }
 
 // カタログをDBに登録
 function insert_catalog($dbh, $catalog_name, $user_id, $catalog_comment) {
@@ -112,6 +101,86 @@ function delete_catalog($dbh, $catalog_id) {
     echo($e -> getMessage());
     die();
   }
+}
+
+// カタログ更新
+function update_catalog($dbh, $catalog_id) {
+  $date = date('Y-m-d H:i:s');
+  try {
+    $sql = "UPDATE catalog SET updated = '{$date}' WHERE catalog_id = :catalog_id";
+    $stmt = $dbh -> prepare($sql);
+    $stmt -> bindValue(':catalog_id', $catalog_id, PDO::PARAM_STR);
+    $stmt -> execute();
+  }catch (PDOException $e) {
+    echo($e -> getMessage());
+    die();
+  }
+}
+
+// アイテムIDによるカタログIDの取得
+function get_catalog_id_by_item($dbh, $item_id) {
+  try {
+    $sql = "SELECT * FROM item WHERE (item_id) = (:item_id)";
+    $stmt = $dbh -> prepare($sql);
+    $stmt -> bindValue(':item_id', $item_id, PDO::PARAM_STR);
+    $stmt -> execute();
+  }catch (PDOException $e) {
+    echo($e -> getMessage());
+    die();
+  }
+  $result = $stmt->fetch(PDO::FETCH_ASSOC);
+  return $result['catalog_id'];
+}
+
+// カタログのロック状態変更
+function change_lock($dbh, $catalog_id, $catalog_lock) {
+  try {
+    $sql = "UPDATE catalog SET catalog_lock = :catalog_lock WHERE catalog_id = :catalog_id";
+    $stmt = $dbh -> prepare($sql);
+    $stmt -> bindValue(':catalog_id', $catalog_id, PDO::PARAM_STR);
+    $stmt -> bindValue(':catalog_lock', $catalog_lock, PDO::PARAM_STR);
+    $stmt -> execute();
+  }catch (PDOException $e) {
+    echo($e -> getMessage());
+    die();
+  }
+}
+
+// 特定のカタログをカタログリストから除外
+function list_minus_catalog($catalog_list, $catalog_id) {
+  $new_catalog_list = [];
+  foreach($catalog_list as $row){
+    if($row['catalog_id'] != $catalog_id) {
+      $new_catalog_list[] = $row;
+    }
+  }
+  return $new_catalog_list;
+}
+
+// ロック中のカタログをカタログリストから除外
+function list_minus_locked($catalog_list) {
+    $new_catalog_list = [];
+    foreach($catalog_list as $row){
+      if($row['catalog_lock'] == 1) {
+        $new_catalog_list[] = $row;
+      }
+    }
+    return $new_catalog_list;
+}
+
+// お気に入り数の更新
+function update_favo($dbh, $catalog_id, $value) {
+  try {
+    $sql = "UPDATE catalog SET favos = favos + :value WHERE catalog_id = :catalog_id";
+    $stmt = $dbh -> prepare($sql);
+    $stmt -> bindValue(':catalog_id', $catalog_id, PDO::PARAM_STR);
+    $stmt -> bindValue(':value', $value, PDO::PARAM_STR);
+    $stmt -> execute();
+  }catch (PDOException $e) {
+    echo($e -> getMessage());
+    die();
+  }
+
 }
 
 ///////////////////////////////////////////////////
@@ -163,6 +232,57 @@ function delete_item_by_catalog($dbh, $catalog_id) {
   }
 }
 
+///////////////////////////////////////////////////
+// お気に入り関連
+///////////////////////////////////////////////////
+
+// 特定のカタログがお気に入りに入っているかどうか
+function check_favo($dbh, $user_id, $catalog_id) {
+  try {
+    $sql = "SELECT * FROM favo WHERE (user_id, catalog_id) = (:user_id, :catalog_id)";
+    $stmt = $dbh -> prepare($sql);
+    $stmt -> bindValue(':user_id', $user_id, PDO::PARAM_STR);
+    $stmt -> bindValue(':catalog_id', $catalog_id, PDO::PARAM_STR);
+    $stmt -> execute();
+  }catch (PDOException $e) {
+    echo($e -> getMessage());
+    die();
+  }
+  $result = $stmt->fetch(PDO::FETCH_ASSOC);
+  if ($result == NULL) {
+    return 0;
+  } else {
+    return 1;
+  }
+}
+
+// お気に入り追加
+function plus_favo($dbh, $catalog_id, $user_id) {
+  try {
+    $sql = "INSERT INTO favo (user_id, catalog_id) VALUE (:user_id, :catalog_id)";
+    $stmt = $dbh -> prepare($sql);
+    $stmt -> bindValue(':user_id', $user_id, PDO::PARAM_STR);
+    $stmt -> bindValue(':catalog_id', $catalog_id, PDO::PARAM_STR);
+    $stmt -> execute();
+  }catch (PDOException $e) {
+    echo($e -> getMessage());
+    die();
+  }
+}
+
+// お気に入り削除
+function minus_favo($dbh, $catalog_id, $user_id) {
+  try {
+    $sql = "DELETE FROM favo WHERE (user_id, catalog_id) = (:user_id, :catalog_id)";
+    $stmt = $dbh -> prepare($sql);
+    $stmt -> bindValue(':user_id', $user_id, PDO::PARAM_STR);
+    $stmt -> bindValue(':catalog_id', $catalog_id, PDO::PARAM_STR);
+    $stmt -> execute();
+  }catch (PDOException $e) {
+    echo($e -> getMessage());
+    die();
+  }
+}
 
 ///////////////////////////////////////////////////
 // 表示関連
@@ -212,6 +332,20 @@ function get_user_name($dbh, $screen_name) {
   return $result['user_name'];
 }
 
+// プロフ画像URLの取得
+function get_user_image($dbh, $screen_name) {
+  try {
+    $sql = "SELECT * FROM user WHERE (screen_name) = (:screen_name)";
+    $stmt = $dbh -> prepare($sql);
+    $stmt -> bindValue(':screen_name', $screen_name, PDO::PARAM_STR);
+    $stmt -> execute();
+  }catch (PDOException $e) {
+    echo($e -> getMessage());
+    die();
+  }
+  $result = $stmt->fetch(PDO::FETCH_ASSOC);
+  return $result['profile_image_url_https'];
+}
 
 // カタログリストの取得
 function get_catalog_list($dbh, $user_id) {

@@ -13,7 +13,7 @@ $dbh = get_db_connect ();
 
 // リクエストUSITE_URLのスラッシュを除去
 $request_url = ltrim(html_escape($_SERVER['REQUEST_URI']), '/');
-echo $request_url.PHP_EOL;
+
 // 'login'の場合以外はurlをセッションに保管
 if(ltrim(html_escape($_SERVER['REQUEST_URI']), '/') != 'login'){
 	$_SESSION['request_url'] = $request_url;
@@ -38,16 +38,16 @@ switch ($request_url) {
 		///////////////////////////////////////////////////
 		// トップページ
 		///////////////////////////////////////////////////
-		$_SESSION['title'] = 'カタログメーカー';
+		$_SESSION['title'] = 'トップ';
 		require_once ( __DIR__ . '/head.php');
 		if(!isset($_SESSION['access_token'])){
 			// 未ログイン
 			// トップページ呼び出し
-				echo "<a href='login'>Twitterでログイン</a>";
+				require_once ( __DIR__ . '/v_top.php');
 		}else{
 			// ログイン中
 			// screen_nameが変わっているかもしれないので一応上書き
-		  update_screen_name($dbh, $_SESSION['id'], $_SESSION['screen_name'], $_SESSION['user_name']);
+		  update_screen_name($dbh, $_SESSION['id'], $_SESSION['screen_name'], $_SESSION['user_name'], $_SESSION['profile_image_url_https']);
 			// 自分のページ(/username)へリダイレクト
 			header( 'location: '. SITE_URL.'/'.$_SESSION['screen_name'] );
 
@@ -92,21 +92,6 @@ switch ($request_url) {
 		}
 		break;
 
-	case 'setting':
-		///////////////////////////////////////////////////
-		// 設定ページ
-		///////////////////////////////////////////////////
-		$_SESSION['title'] = '設定';
-		require_once ( __DIR__ . '/head.php');
-		if(!isset($_SESSION['access_token'])){
-			// 未ログイン
-			header( 'location: '. SITE_URL );
-		}else{
-			// ログイン中
-			require_once ( __DIR__ . '/setting.php');
-		}
-		break;
-
 	default:
 		if(preg_match('|^[0-9a-z_]+[/]{1}[c]{1}[0-9]+$|', $request_url)){
 			list($url1, $url2) = explode("/c", $request_url);
@@ -120,9 +105,9 @@ switch ($request_url) {
 				require_once ( __DIR__ . '/head.php');
 				require_once ( __DIR__ . '/404.php');
 			}else{
-				// あればカタログの有無を確認
+				// あればカタログの有無を確認(ロック中で自分以外の場合もNot Found)
 				$catalog = get_catalog($dbh, $user_id, $url2);
-				if($catalog == NULL){
+				if($catalog == NULL || ($catalog['catalog_lock'] == 0 && $url1 != $_SESSION['screen_name'] )){
 					// 無ければ404
 					$_SESSION['title'] = 'お探しのページが見つかりませんでした';
 					require_once ( __DIR__ . '/head.php');
@@ -134,6 +119,14 @@ switch ($request_url) {
 					$user_name = get_user_name($dbh, $screen_name);
 					$catalog_item =	get_catalog_item($dbh, $catalog['catalog_id']);
 
+					// カタログリストも取得
+					$catalog_list = get_catalog_list($dbh, $user_id);
+					// カタログページのメインになるカタログは除外
+					$catalog_list = list_minus_catalog($catalog_list, $catalog['catalog_id']);
+					// 自分じゃない時はロック中のカタログを除外
+					if($url1 != $_SESSION['screen_name']){
+						$catalog_list = list_minus_locked($catalog_list);
+					}
 					$_SESSION['title'] = $catalog['catalog_name'];
 					require_once ( __DIR__ . '/head.php');
 					require_once ( __DIR__ . '/v_catalog.php');
@@ -191,4 +184,4 @@ switch ($request_url) {
 		}
 		break;
 }
-require_once ( __DIR__ . '/foot.php');
+require_once ( __DIR__ . '/footer.php');

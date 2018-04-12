@@ -10,7 +10,7 @@ $dbh = get_db_connect ();
 
 $catalog_name = html_escape($_POST['catalog_name']);
 $user_id = get_user_id($dbh, $_SESSION['request_url']);
-$catalog_comment = html_escape($_POST['catalog_comment']);
+$catalog_comment = nl2br(html_escape($_POST['catalog_comment']));
 $request_url = $_SESSION['request_url'];
 
 insert_catalog($dbh, $catalog_name, $user_id, $catalog_comment);
