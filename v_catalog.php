@@ -25,8 +25,6 @@ $profile_image_url_https = get_user_image($dbh, $screen_name);
           <div class="bs-component maker1">
             <span>カタログ作成者</span>
           </div>
-        </div>
-        <div class="col-xs-9">
           <div class="bs-component maker2">
             <a href="<?php echo SITE_URL. '/'. $screen_name; ?>"><?php echo $user_name; ?></a>
           </div>
@@ -34,39 +32,51 @@ $profile_image_url_https = get_user_image($dbh, $screen_name);
       </div>
     </div>
     <div class="icons">
-    <?php
-    if(isset($_SESSION['access_token'])){
-      // ログイン中
-      $favo_class = 'favo btn btn-default';
-      // 訪問者のユーザーIDを取得
-      $my_user_id = get_user_id($dbh, $_SESSION['screen_name']);
-      $is_favo = check_favo($dbh, $my_user_id, $catalog['catalog_id']);
-      if($is_favo == 0){
-        // 0…ファボ無し
-      }else{
-        // 1…ファボ有り
-        $favo_class = 'favo btn btn-warning';
+      <?php
+      if(isset($_SESSION['access_token'])){
+        // ログイン中
+        $favo_class = 'favo btn btn-default';
+        // 訪問者のユーザーIDを取得
+        $my_user_id = get_user_id($dbh, $_SESSION['screen_name']);
+        $is_favo = check_favo($dbh, $my_user_id, $catalog['catalog_id']);
+        if($is_favo == 0){
+          // 0…ファボ無し
+        }else{
+          // 1…ファボ有り
+          $favo_class = 'favo btn btn-warning';
+        }
+        ?>
+        <button class="<?php echo $favo_class ?>" value="<?php echo $catalog['catalog_id'].','.$my_user_id.','.$is_favo ?>" id="<?php echo 'favo_btn'. $catalog['catalog_id'] ?>">
+          <i id="<?php echo 'favo_icon'. $catalog['catalog_id'] ?>"class="glyphicon glyphicon-star"></i>
+        </button>
+      <?php
       }
-    ?>
-      <button class="<?php echo $favo_class ?>" value="<?php echo $catalog['catalog_id'].','.$my_user_id.','.$is_favo ?>" id="<?php echo 'favo_btn'. $catalog['catalog_id'] ?>">
-        <i id="<?php echo 'favo_icon'. $catalog['catalog_id'] ?>"class="glyphicon glyphicon-star"></i>
-      </button>
-    <?php
-    }
-    if($screen_name == $_SESSION['screen_name']){
-    ?>
-    <?php
-    $icon_class = 'fa fa-lock';
-    if($catalog['catalog_lock'] == 1){
-      $icon_class = 'fa fa-unlock-alt';
-    }
-    ?>
-      <button class="lock btn btn-default" value="<?php echo $catalog['catalog_id'].','.$catalog['catalog_lock'] ?>" id="<?php echo 'lock_btn'. $catalog['catalog_id'] ?>"><i id="<?php echo 'lock_icon'. $catalog['catalog_id'] ?>" class="<?php echo $icon_class ?>"></i></button>
-      <button class="delete_catalog_alert btn btn-danger" name="catalog_page" value="<?php echo $catalog['catalog_id']; ?>"><i class="glyphicon glyphicon-trash"></i></button>
-    <?php } ?>
+      if($screen_name == $_SESSION['screen_name']){
+      ?>
+      <?php
+      $icon_class = 'fa fa-lock';
+      if($catalog['catalog_lock'] == 1){
+        $icon_class = 'fa fa-unlock-alt';
+      }
+      ?>
+        <button class="lock btn btn-default" value="<?php echo $catalog['catalog_id'].','.$catalog['catalog_lock'] ?>" id="<?php echo 'lock_btn'. $catalog['catalog_id'] ?>"><i id="<?php echo 'lock_icon'. $catalog['catalog_id'] ?>" class="<?php echo $icon_class ?>"></i></button>
+        <button class="delete_catalog_alert btn btn-danger" name="catalog_page" value="<?php echo $catalog['catalog_id']; ?>"><i class="glyphicon glyphicon-trash"></i></button>
+      <?php } ?>
     </div>
   </div>
 </div>
+
+<?php
+$tweet_comment = "このカタログ、気になる！";
+if($screen_name == $_SESSION['screen_name']){
+  // 自分のカタログの場合
+  $tweet_comment = "こんなカタログ、作ってみました！";
+}
+?>
+<a class="btn twitter twi_btn" target="_blank"
+ href="http://twitter.com/share?url=<?php echo SITE_URL.'/'.$request_url; ?>&text=<?php echo $tweet_comment; ?>%0a『<?php echo $catalog['catalog_name']; ?>』%0a&hashtags=カタログメーカー">
+ <i class="fa fa-lg fa-twitter"></i>&nbsp;このカタログをシェア（ツイート）
+</a>
 
 <div class="panel panel-warning panel_main">
   <div class="panel-heading">
@@ -129,7 +139,10 @@ $profile_image_url_https = get_user_image($dbh, $screen_name);
     <?php } ?>
   </div>
 </div>
-
+<a class="btn twitter twi_btn" target="_blank"
+ href="http://twitter.com/share?url=<?php echo SITE_URL.'/'.$request_url; ?>&text=このカタログ、気になる！%0a『<?php echo $catalog['catalog_name']; ?>』%0a&hashtags=カタログメーカー">
+ <i class="fa fa-lg fa-twitter"></i>&nbsp;このカタログをシェア（ツイート）
+</a>
 <div class="panel panel-success panel_main">
   <div class="panel-heading">
     <h2 class="panel-title"><?php echo $user_name; ?>&nbsp;の他のカタログ</h2>
@@ -158,21 +171,36 @@ $profile_image_url_https = get_user_image($dbh, $screen_name);
                 <div class="updated">
                   <i class="glyphicon glyphicon-repeat updated_icon"></i>&nbsp;<?php echo date('Y年n月j日', strtotime($row['updated'])); ?>
                 </div>
-                <?php
-                if($screen_name == $_SESSION['screen_name']){
-                ?>
-                  <div class="icons">
-                    <?php
+                <div class="icons">
+                  <?php
+                  if(isset($_SESSION['access_token'])){
+                    // ログイン中
+                    $favo_class = 'favo btn btn-default';
+                    // 訪問者のユーザーIDを取得…は上でもしてるから省略
+                    // $my_user_id = get_user_id($dbh, $_SESSION['screen_name']);
+                    $is_favo = check_favo($dbh, $my_user_id, $row['catalog_id']);
+                    if($is_favo == 0){
+                      // 0…ファボ無し
+                    }else{
+                      // 1…ファボ有り
+                      $favo_class = 'favo btn btn-warning';
+                    }
+                  ?>
+                    <button class="<?php echo $favo_class ?>" value="<?php echo $row['catalog_id'].','.$my_user_id.','.$is_favo ?>" id="<?php echo 'favo_btn'. $row['catalog_id'] ?>">
+                      <i id="<?php echo 'favo_icon'. $row['catalog_id'] ?>"class="glyphicon glyphicon-star"></i>
+                    </button>
+                  <?php
+                  }
+                  if($screen_name == $_SESSION['screen_name']){
                     $icon_class = 'fa fa-lock';
                     if($row['catalog_lock'] == 1){
                       $icon_class = 'fa fa-unlock-alt';
                     }
-                    ?>
-                    <button class="favo btn btn-warning" value=""><i class="glyphicon glyphicon-star-empty"></i></button>
+                  ?>
                     <button class="lock btn btn-default" value="<?php echo $row['catalog_id'].','.$row['catalog_lock'] ?>" id="<?php echo 'lock_btn'. $row['catalog_id'] ?>"><i id="<?php echo 'lock_icon'. $row['catalog_id'] ?>" class="<?php echo $icon_class ?>"></i></button>
                     <button class="delete_catalog_alert btn btn-danger" value="<?php echo $row['catalog_id']; ?>"><i class="glyphicon glyphicon-trash"></i></button>
-                  </div>
-                <?php } ?>
+                  <?php } ?>
+                </div>
               </div>
             </div>
           </li>

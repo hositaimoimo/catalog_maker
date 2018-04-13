@@ -10,6 +10,15 @@ if (!isset($_SESSION)) {
 <meta http-equiv="X-UA-Compatible" content="IE=edge">
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
+
+<meta property="og:title"       content="<?php echo $_SESSION['title']; ?>">
+<meta property="og:description" content="カタログメーカー">
+<meta property="og:url"         content="<?php echo SITE_URL.'/'.$request_url ?>">
+<meta property="og:type"        content="website">
+<meta name="twitter:card"       content="summary">
+<meta name="twitter:site"       content="@catalog_maker">
+<meta name="twitter:creator"    content="@catalog_maker">
+
 <link rel="stylesheet" href="//maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css">
 <link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/sweetalert/1.1.3/sweetalert.min.css">
 <link rel="stylesheet" href="//catamake.com/honoka/css/bootstrap.min.css"><!-- Honoka -->

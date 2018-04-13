@@ -42,6 +42,9 @@ update_catalog($dbh, $catalog_id);
 // 登録完了フラグ
 $_SESSION['item_finish'] = $item_name;
 
+// 登録したカタログの取得
+$user_id = get_user_id($dbh, $_SESSION['screen_name']);
+$_SESSION['regist_catalog'] = get_catalog($dbh, $user_id, $catalog_id);
 
 // 最後に元のページに戻る
 header( 'location: '. SITE_URL.'/'.$request_url );

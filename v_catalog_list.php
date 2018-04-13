@@ -3,6 +3,8 @@ if (!isset($_SESSION)) {
   session_start();
 }
 
+// 訪問者のユーザーIDを取得
+$my_user_id = get_user_id($dbh, $_SESSION['screen_name']);
 ?>
 
 <div class="panel panel-success panel_main">
@@ -33,21 +35,34 @@ if (!isset($_SESSION)) {
                 <div class="updated">
                   <i class="glyphicon glyphicon-repeat updated_icon"></i>&nbsp;<?php echo date('Y年n月j日', strtotime($row['updated'])); ?>
                 </div>
-                <?php
-                if($screen_name == $_SESSION['screen_name']){
-                ?>
-                  <div class="icons">
-                    <?php
+                <div class="icons">
+                  <?php
+                  if(isset($_SESSION['access_token'])){
+                    // ログイン中
+                    $favo_class = 'favo btn btn-default';
+                    $is_favo = check_favo($dbh, $my_user_id, $row['catalog_id']);
+                    if($is_favo == 0){
+                      // 0…ファボ無し
+                    }else{
+                      // 1…ファボ有り
+                      $favo_class = 'favo btn btn-warning';
+                    }
+                    ?>
+                    <button class="<?php echo $favo_class ?>" value="<?php echo $row['catalog_id'].','.$my_user_id.','.$is_favo ?>" id="<?php echo 'favo_btn'. $row['catalog_id'] ?>">
+                      <i id="<?php echo 'favo_icon'. $row['catalog_id'] ?>"class="glyphicon glyphicon-star"></i>
+                    </button>
+                  <?php
+                  }
+                  if($screen_name == $_SESSION['screen_name']){
                     $icon_class = 'fa fa-lock';
                     if($row['catalog_lock'] == 1){
                       $icon_class = 'fa fa-unlock-alt';
                     }
                     ?>
-                    <button class="favo btn btn-warning" value=""><i class="glyphicon glyphicon-star-empty"></i></button>
                     <button class="lock btn btn-default" value="<?php echo $row['catalog_id'].','.$row['catalog_lock'] ?>" id="<?php echo 'lock_btn'. $row['catalog_id'] ?>"><i id="<?php echo 'lock_icon'. $row['catalog_id'] ?>" class="<?php echo $icon_class ?>"></i></button>
                     <button class="delete_catalog_alert btn btn-danger" value="<?php echo $row['catalog_id']; ?>"><i class="glyphicon glyphicon-trash"></i></button>
-                  </div>
-                <?php } ?>
+                  <?php } ?>
+                </div>
               </div>
             </div>
           </li>

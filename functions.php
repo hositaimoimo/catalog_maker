@@ -180,7 +180,6 @@ function update_favo($dbh, $catalog_id, $value) {
     echo($e -> getMessage());
     die();
   }
-
 }
 
 ///////////////////////////////////////////////////
@@ -239,7 +238,7 @@ function delete_item_by_catalog($dbh, $catalog_id) {
 // 特定のカタログがお気に入りに入っているかどうか
 function check_favo($dbh, $user_id, $catalog_id) {
   try {
-    $sql = "SELECT * FROM favo WHERE (user_id, catalog_id) = (:user_id, :catalog_id)";
+    $sql = "SELECT * FROM favo WHERE (favo_user_id, catalog_id) = (:user_id, :catalog_id)";
     $stmt = $dbh -> prepare($sql);
     $stmt -> bindValue(':user_id', $user_id, PDO::PARAM_STR);
     $stmt -> bindValue(':catalog_id', $catalog_id, PDO::PARAM_STR);
@@ -259,7 +258,7 @@ function check_favo($dbh, $user_id, $catalog_id) {
 // お気に入り追加
 function plus_favo($dbh, $catalog_id, $user_id) {
   try {
-    $sql = "INSERT INTO favo (user_id, catalog_id) VALUE (:user_id, :catalog_id)";
+    $sql = "INSERT INTO favo (favo_user_id, catalog_id) VALUE (:user_id, :catalog_id)";
     $stmt = $dbh -> prepare($sql);
     $stmt -> bindValue(':user_id', $user_id, PDO::PARAM_STR);
     $stmt -> bindValue(':catalog_id', $catalog_id, PDO::PARAM_STR);
@@ -273,9 +272,22 @@ function plus_favo($dbh, $catalog_id, $user_id) {
 // お気に入り削除
 function minus_favo($dbh, $catalog_id, $user_id) {
   try {
-    $sql = "DELETE FROM favo WHERE (user_id, catalog_id) = (:user_id, :catalog_id)";
+    $sql = "DELETE FROM favo WHERE (favo_user_id, catalog_id) = (:user_id, :catalog_id)";
     $stmt = $dbh -> prepare($sql);
     $stmt -> bindValue(':user_id', $user_id, PDO::PARAM_STR);
+    $stmt -> bindValue(':catalog_id', $catalog_id, PDO::PARAM_STR);
+    $stmt -> execute();
+  }catch (PDOException $e) {
+    echo($e -> getMessage());
+    die();
+  }
+}
+
+// カタログ削除に伴うお気に入り削除
+function delete_favo_by_catalog($dbh, $catalog_id) {
+  try {
+    $sql = "DELETE FROM favo WHERE catalog_id = :catalog_id";
+    $stmt = $dbh -> prepare($sql);
     $stmt -> bindValue(':catalog_id', $catalog_id, PDO::PARAM_STR);
     $stmt -> execute();
   }catch (PDOException $e) {
@@ -353,6 +365,61 @@ function get_catalog_list($dbh, $user_id) {
     $sql = "SELECT * FROM catalog WHERE (user_id) = (:user_id)";
     $stmt = $dbh -> prepare($sql);
     $stmt -> bindValue(':user_id', $user_id, PDO::PARAM_STR);
+    $stmt -> execute();
+    $catalog_list = [];
+    $count = $stmt->rowCount();
+    while($row = $stmt->fetch(PDO::FETCH_ASSOC)){
+      $catalog_list[] = $row;
+    }
+  }catch (PDOException $e) {
+    echo($e -> getMessage());
+    die();
+  }
+  return $catalog_list;
+}
+
+// お気に入りカタログリストの取得
+function get_favo_catalog_list($dbh, $user_id) {
+  try {
+    $sql = "SELECT * FROM catalog INNER JOIN favo ON catalog.catalog_id = favo.catalog_id WHERE favo_user_id = :user_id";
+    $stmt = $dbh -> prepare($sql);
+    $stmt -> bindValue(':user_id', $user_id, PDO::PARAM_STR);
+    $stmt -> execute();
+    $catalog_list = [];
+    $count = $stmt->rowCount();
+    while($row = $stmt->fetch(PDO::FETCH_ASSOC)){
+      $catalog_list[] = $row;
+    }
+  }catch (PDOException $e) {
+    echo($e -> getMessage());
+    die();
+  }
+  return $catalog_list;
+}
+
+// 人気順にカタログを取得
+function get_pop_catalog_list($dbh) {
+  try {
+    $sql = "SELECT * FROM catalog ORDER BY favos DESC LIMIT 30";
+    $stmt = $dbh -> prepare($sql);
+    $stmt -> execute();
+    $catalog_list = [];
+    $count = $stmt->rowCount();
+    while($row = $stmt->fetch(PDO::FETCH_ASSOC)){
+      $catalog_list[] = $row;
+    }
+  }catch (PDOException $e) {
+    echo($e -> getMessage());
+    die();
+  }
+  return $catalog_list;
+}
+
+// 新着順にカタログを取得
+function get_new_catalog_list($dbh) {
+  try {
+    $sql = "SELECT * FROM catalog ORDER BY updated DESC LIMIT 30";
+    $stmt = $dbh -> prepare($sql);
     $stmt -> execute();
     $catalog_list = [];
     $count = $stmt->rowCount();

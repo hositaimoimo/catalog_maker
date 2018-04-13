@@ -42,8 +42,19 @@ switch ($request_url) {
 		require_once ( __DIR__ . '/head.php');
 		if(!isset($_SESSION['access_token'])){
 			// 未ログイン
+
+			// 訪問者のユーザーIDを取得(意味ないけど一応)
+			$user_id = get_user_id($dbh, $_SESSION['screen_name']);
+			// 人気カタログリストを取得
+			$pop_catalog_list = get_pop_catalog_list($dbh);
+			// 新着カタログリストを取得
+			$new_catalog_list = get_new_catalog_list($dbh);
+			// ロック中のカタログを除外
+			$pop_catalog_list = list_minus_locked($pop_catalog_list);
+			$new_catalog_list = list_minus_locked($new_catalog_list);
 			// トップページ呼び出し
-				require_once ( __DIR__ . '/v_top.php');
+			require_once ( __DIR__ . '/v_top.php');
+
 		}else{
 			// ログイン中
 			// screen_nameが変わっているかもしれないので一応上書き
@@ -92,6 +103,65 @@ switch ($request_url) {
 		}
 		break;
 
+	case 'fav':
+		///////////////////////////////////////////////////
+		// お気に入りカタログページ
+		///////////////////////////////////////////////////
+		$_SESSION['title'] = 'お気に入り';
+		require_once ( __DIR__ . '/head.php');
+		if(!isset($_SESSION['access_token'])){
+			// 未ログイン
+			header( 'location: '. SITE_URL );
+		}else{
+			// ログイン中
+			// 訪問者のユーザーIDを取得
+			$user_id = get_user_id($dbh, $_SESSION['screen_name']);
+			// カタログリストを取得
+			$fav_catalog_list = get_favo_catalog_list($dbh, $user_id);
+			require_once ( __DIR__ . '/v_favo_catalog.php');
+		}
+		break;
+
+	case 'pop':
+		///////////////////////////////////////////////////
+		// 人気カタログページ
+		///////////////////////////////////////////////////
+		$_SESSION['title'] = '人気カタログ';
+		require_once ( __DIR__ . '/head.php');
+		// 訪問者のユーザーIDを取得
+		$user_id = get_user_id($dbh, $_SESSION['screen_name']);
+		// カタログリストを取得
+		$pop_catalog_list = get_pop_catalog_list($dbh);
+		// ロック中のカタログを除外
+		$pop_catalog_list = list_minus_locked($pop_catalog_list);
+		require_once ( __DIR__ . '/v_pop_catalog.php');
+
+		break;
+
+	case 'new':
+		///////////////////////////////////////////////////
+		// 新着カタログページ
+		///////////////////////////////////////////////////
+		$_SESSION['title'] = '新着カタログ';
+		require_once ( __DIR__ . '/head.php');
+		// 訪問者のユーザーIDを取得
+		$user_id = get_user_id($dbh, $_SESSION['screen_name']);
+		// カタログリストを取得
+		$new_catalog_list = get_new_catalog_list($dbh);
+		// ロック中のカタログを除外
+		$new_catalog_list = list_minus_locked($new_catalog_list);
+		require_once ( __DIR__ . '/v_new_catalog.php');
+		break;
+
+	// case 'search':
+	// 	///////////////////////////////////////////////////
+	// 	// 検索ページ
+	// 	///////////////////////////////////////////////////
+	// 	$_SESSION['title'] = 'カタログ検索';
+	// 	require_once ( __DIR__ . '/head.php');
+	// 	require_once ( __DIR__ . '/v_search.php');
+	// 	break;
+
 	default:
 		if(preg_match('|^[0-9a-z_]+[/]{1}[c]{1}[0-9]+$|', $request_url)){
 			list($url1, $url2) = explode("/c", $request_url);
@@ -133,9 +203,6 @@ switch ($request_url) {
 				}
 			}
 		}else{
-
-			// /s?... s?で始まっているか？正規表現使って何とかする
-			// 検索結果表示
 
 			// 訪問先のユーザーIDがあるか確認(あれば取得)
 			$user_id = get_user_id($dbh, $request_url);
